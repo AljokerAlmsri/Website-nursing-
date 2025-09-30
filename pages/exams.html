@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الاختبارات - منصة التمريض</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- شريط التنقل -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2><a href="../index.html" style="text-decoration: none; color: inherit;">منصة التمريض</a></h2>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">الرئيسية</a>
+                </li>
+                <li class="nav-item">
+                    <a href="exams.html" class="nav-link active">الاختبارات</a>
+                </li>
+                <li class="nav-item">
+                    <a href="medical-articles.html" class="nav-link">المقالات الطبية</a>
+                </li>
+                <li class="nav-item" id="authLinks">
+                    <a href="login.html" class="nav-link">تسجيل الدخول</a>
+                </li>
+                <li class="nav-item" id="userMenu" style="display: none;">
+                    <a href="dashboard.html" class="nav-link">لوحة التحكم</a>
+                </li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- صفحة الاختبارات -->
+    <section class="exams-page">
+        <div class="container">
+            <div class="page-header">
+                <h1>الاختبارات</h1>
+                <p>اختبر معلوماتك وتابع تقدمك التعليمي</p>
+            </div>
+
+            <!-- قسم المتصدرين -->
+            <div class="leaderboard-section">
+                <h2>المتصدرين</h2>
+                <div class="leaderboard" id="leaderboard">
+                    <!-- سيتم ملؤها ديناميكياً -->
+                </div>
+            </div>
+
+            <!-- قائمة الاختبارات -->
+            <div class="exams-section">
+                <h2>الاختبارات المتاحة</h2>
+                <div class="exams-filters">
+                    <select id="examCategory" class="form-control">
+                        <option value="">جميع التصنيفات</option>
+                        <option value="تمريض">تمريض</option>
+                        <option value="تشريح">تشريح</option>
+                        <option value="صحة">صحة</option>
+                        <option value="أدوية">أدوية</option>
+                    </select>
+                    <select id="examDifficulty" class="form-control">
+                        <option value="">جميع المستويات</option>
+                        <option value="سهل">سهل</option>
+                        <option value="متوسط">متوسط</option>
+                        <option value="صعب">صعب</option>
+                    </select>
+                </div>
+                <div class="exams-grid" id="examsGrid">
+                    <!-- سيتم ملؤها ديناميكياً -->
+                </div>
+            </div>
+
+            <!-- نتائجي -->
+            <div class="my-results-section" id="myResultsSection" style="display: none;">
+                <h2>نتائجي</h2>
+                <div class="results-table" id="myResults">
+                    <!-- سيتم ملؤها ديناميكياً -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- نموذج بدء الاختبار -->
+    <div id="examStartModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="examModalTitle">بدء الاختبار</h2>
+            <div id="examInstructions">
+                <h3>تعليمات الاختبار:</h3>
+                <ul>
+                    <li>الاختبار مكون من <span id="questionsCount">0</span> أسئلة</li>
+                    <li>مدة الاختبار: <span id="examDuration">0</span> دقيقة</li>
+                    <li>لا يمكنك الخروج من الاختبار بعد البدء</li>
+                    <li>يتم حفظ النتيجة من أول محاولة فقط</li>
+                    <li>تأكد من اتصال الإنترنت قبل البدء</li>
+                </ul>
+            </div>
+            <div class="modal-actions">
+                <button id="startExamBtn" class="btn btn-primary">بدء الاختبار</button>
+                <button class="btn btn-outline" onclick="closeModal('examStartModal')">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- صفحة الاختبار -->
+    <div id="examContainer" class="exam-container" style="display: none;">
+        <div class="exam-header">
+            <div class="exam-info">
+                <h2 id="examTitle">عنوان الاختبار</h2>
+                <div class="exam-meta">
+                    <span>الوقت المتبقي: <span id="timeRemaining">00:00</span></span>
+                    <span>السؤال: <span id="currentQuestion">1</span> من <span id="totalQuestions">0</span></span>
+                </div>
+            </div>
+            <div class="exam-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="exam-content">
+            <div class="question-card" id="questionCard">
+                <h3 id="questionText">نص السؤال</h3>
+                <div class="options-list" id="optionsList">
+                    <!-- سيتم ملؤها ديناميكياً -->
+                </div>
+            </div>
+
+            <div class="exam-navigation">
+                <button id="prevQuestion" class="btn btn-outline">السابق</button>
+                <button id="nextQuestion" class="btn btn-primary">التالي</button>
+                <button id="submitExam" class="btn btn-success" style="display: none;">إنهاء الاختبار</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نتيجة الاختبار -->
+    <div id="examResultModal" class="modal">
+        <div class="modal-content">
+            <h2>نتيجة الاختبار</h2>
+            <div class="result-content" id="resultContent">
+                <!-- سيتم ملؤها ديناميكياً -->
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="closeModal('examResultModal')">حسناً</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/database.js"></script>
+    <script src="../js/content.js"></script>
+    <script src="../js/ui.js"></script>
+    <script>
+        let currentExam = null;
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let examTimer = null;
+        let examTimeLeft = 0;
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            updateAuthUI();
+            await loadExams();
+            await loadLeaderboard();
+            setupEventListeners();
+
+            // إذا كان المستخدم مسجل الدخول، تحميل نتائجه
+            if (authManager.currentUser) {
+                await loadMyResults();
+            }
+        });
+
+        async function loadExams() {
+            const exams = await dbManager.getExams();
+            displayExams(exams);
+        }
+
+        function displayExams(exams) {
+            const grid = document.getElementById('examsGrid');
+            
+            if (exams.length === 0) {
+                grid.innerHTML = '<p class="no-exams">لا توجد اختبارات متاحة حالياً</p>';
+                return;
+            }
+
+            grid.innerHTML = exams.map(exam => `
+                <div class="exam-card" data-category="${exam.category || 'عام'}" data-difficulty="${exam.difficulty || 'متوسط'}">
+                    <div class="exam-icon">📝</div>
+                    <h3>${exam.title}</h3>
+                    <div class="exam-meta">
+                        <span>${exam.category || 'عام'}</span>
+                        <span>•</span>
+                        <span>${exam.difficulty || 'متوسط'}</span>
+                        <span>•</span>
+                        <span>${exam.questions ? exam.questions.length : 0} أسئلة</span>
+                    </div>
+                    <p class="exam-description">${exam.description || ''}</p>
+                    <div class="exam-actions">
+                        <button class="btn btn-primary" onclick="startExam('${exam.id}')">بدء الاختبار</button>
+                        <button class="btn btn-outline" onclick="viewExamDetails('${exam.id}')">تفاصيل</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function loadLeaderboard() {
+            try {
+                // الحصول على أفضل النتائج
+                const resultsSnapshot = await db.collection('examResults')
+                    .orderBy('result.score', 'desc')
+                    .limit(10)
+                    .get();
+
+                const leaderboardData = [];
+                
+                for (const doc of resultsSnapshot.docs) {
+                    const result = doc.data();
+                    const userDoc = await db.collection('users').doc(result.userId).get();
+                    
+                    if (userDoc.exists) {
+                        const userData = userDoc.data();
+                        leaderboardData.push({
+                            userName: userData.name,
+                            score: result.result.score,
+                            examTitle: result.result.examTitle,
+                            date: result.createdAt
+                        });
+                    }
+                }
+
+                displayLeaderboard(leaderboardData);
+            } catch (error) {
+                console.error('Error loading leaderboard:', error);
+            }
+        }
+
+        function displayLeaderboard(data) {
+            const leaderboard = document.getElementById('leaderboard');
+            
+            if (data.length === 0) {
+                leaderboard.innerHTML = '<p>لا توجد نتائج حتى الآن</p>';
+                return;
+            }
+
+            leaderboard.innerHTML = data.map((item, index) => `
+                <div class="leaderboard-item ${index < 3 ? 'top-three' : ''}">
+                    <div class="rank">${index + 1}</div>
+                    <div class="user-info">
+                        <div class="user-name">${item.userName}</div>
+                        <div class="exam-name">${item.examTitle}</div>
+                    </div>
+                    <div class="score">${item.score}%</div>
+                </div>
+            `).join('');
+        }
+
+        async function loadMyResults() {
+            if (!authManager.currentUser) return;
+
+            const results = await dbManager.getUserExamResults(authManager.currentUser.uid);
+            const myResultsSection = document.getElementById('myResultsSection');
+            const myResults = document.getElementById('myResults');
+
+            if (results.length === 0) {
+                myResultsSection.style.display = 'none';
+                return;
+            }
+
+            myResultsSection.style.display = 'block';
+            myResults.innerHTML = results.map(result => `
+                <div class="result-item">
+                    <div class="result-exam">${result.result.examTitle}</div>
+                    <div class="result-score">${result.result.score}%</div>
+                    <div class="result-date">${formatDate(result.createdAt)}</div>
+                    <div class="result-time">${result.result.timeSpent || 'غير معروف'}</div>
+                </div>
+            `).join('');
+        }
+
+        async function startExam(examId) {
+            if (!authManager.currentUser) {
+                uiManager.showMessage('يجب تسجيل الدخول لأداء الاختبار', 'error');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // التحقق إذا كان المستخدم قد أدى الاختبار من قبل
+            const previousResults = await db.collection('examResults')
+                .where('userId', '==', authManager.currentUser.uid)
+                .where('examId', '==', examId)
+                .get();
+
+            if (!previousResults.empty) {
+                uiManager.showMessage('لقد قمت بأداء هذا الاختبار من قبل', 'info');
+                return;
+            }
+
+            const examDoc = await db.collection('exams').doc(examId).get();
+            if (examDoc.exists) {
+                currentExam = { id: examDoc.id, ...examDoc.data() };
+                showExamStartModal(currentExam);
+            }
+        }
+
+        function showExamStartModal(exam) {
+            document.getElementById('examModalTitle').textContent = exam.title;
+            document.getElementById('questionsCount').textContent = exam.questions ? exam.questions.length : 0;
+            document.getElementById('examDuration').textContent = exam.duration || 30;
+            document.getElementById('startExamBtn').onclick = () => beginExam(exam);
+            document.getElementById('examStartModal').style.display = 'block';
+        }
+
+        function beginExam(exam) {
+            closeModal('examStartModal');
+            
+            currentQuestions = exam.questions || [];
+            currentQuestionIndex = 0;
+            userAnswers = new Array(currentQuestions.length).fill(null);
+            examTimeLeft = (exam.duration || 30) * 60; // تحويل إلى ثواني
+
+            // إخفاء صفحة الاختبارات وإظهار واجهة الاختبار
+            document.querySelector('.exams-page').style.display = 'none';
+            document.getElementById('examContainer').style.display = 'block';
+
+            // تحديث معلومات الاختبار
+            document.getElementById('examTitle').textContent = exam.title;
+            document.getElementById('totalQuestions').textContent = currentQuestions.length;
+
+            // بدء المؤقت
+            startTimer();
+
+            // عرض السؤال الأول
+            displayQuestion(0);
+        }
+
+        function startTimer() {
+            updateTimerDisplay();
+            examTimer = setInterval(() => {
+                examTimeLeft--;
+                updateTimerDisplay();
+
+                if (examTimeLeft <= 0) {
+                    endExam();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(examTimeLeft / 60);
+            const seconds = examTimeLeft % 60;
+            document.getElementById('timeRemaining').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function displayQuestion(index) {
+            if (index < 0 || index >= currentQuestions.length) return;
+
+            const question = currentQuestions[index];
+            document.getElementById('questionText').textContent = question.text;
+            document.getElementById('currentQuestion').textContent = index + 1;
+
+            // عرض الخيارات
+            const optionsList = document.getElementById('optionsList');
+            optionsList.innerHTML = question.options.map((option, i) => `
+                <label class="option-item">
+                    <input type="radio" name="answer" value="${i}" ${userAnswers[index] === i ? 'checked' : ''}>
+                    <span class="option-text">${option}</span>
+                </label>
+            `).join('');
+
+            // تحديث أزرار التنقل
+            document.getElementById('prevQuestion').style.display = index > 0 ? 'block' : 'none';
+            document.getElementById('nextQuestion').style.display = index < currentQuestions.length - 1 ? 'block' : 'none';
+            document.getElementById('submitExam').style.display = index === currentQuestions.length - 1 ? 'block' : 'none';
+
+            // تحديث شريط التقدم
+            const progress = ((index + 1) / currentQuestions.length) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+
+            currentQuestionIndex = index;
+        }
+
+        function setupEventListeners() {
+            // التنقل بين الأسئلة
+            document.getElementById('prevQuestion').addEventListener('click', () => {
+                saveAnswer();
+                displayQuestion(currentQuestionIndex - 1);
+            });
+
+            document.getElementById('nextQuestion').addEventListener('click', () => {
+                saveAnswer();
+                displayQuestion(currentQuestionIndex + 1);
+            });
+
+            document.getElementById('submitExam').addEventListener('click', endExam);
+
+            // الفلاتر
+            document.getElementById('examCategory').addEventListener('change', filterExams);
+            document.getElementById('examDifficulty').addEventListener('change', filterExams);
+        }
+
+        function saveAnswer() {
+            const selectedOption = document.querySelector('input[name="answer"]:checked');
+            if (selectedOption) {
+                userAnswers[currentQuestionIndex] = parseInt(selectedOption.value);
+            }
+        }
+
+        async function endExam() {
+            clearInterval(examTimer);
+            saveAnswer();
+
+            // حساب النتيجة
+            const score = calculateScore();
+            const timeSpent = formatTimeSpent((currentExam.duration || 30) * 60 - examTimeLeft);
+
+            // حفظ النتيجة
+            const result = {
+                examId: currentExam.id,
+                examTitle: currentExam.title,
+                score: score,
+                totalQuestions: currentQuestions.length,
+                correctAnswers: score / 100 * currentQuestions.length,
+                timeSpent: timeSpent,
+                answers: userAnswers
+            };
+
+            await dbManager.saveExamResult(currentExam.id, result);
+
+            // عرض النتيجة
+            showExamResult(result);
+
+            // العودة إلى صفحة الاختبارات
+            document.querySelector('.exams-page').style.display = 'block';
+            document.getElementById('examContainer').style.display = 'none';
+
+            // تحديث النتائج والمتصدرين
+            await loadMyResults();
+            await loadLeaderboard();
+        }
+
+        function calculateScore() {
+            let correct = 0;
+            currentQuestions.forEach((question, index) => {
+                if (userAnswers[index] === question.correctAnswer) {
+                    correct++;
+                }
+            });
+            return Math.round((correct / currentQuestions.length) * 100);
+        }
+
+        function showExamResult(result) {
+            const resultContent = document.getElementById('resultContent');
+            resultContent.innerHTML = `
+                <div class="result-score">
+                    <h3>${result.score}%</h3>
+                    <p>${result.correctAnswers} إجابة صحيحة من ${result.totalQuestions}</p>
+                </div>
+                <div class="result-details">
+                    <p><strong>الوقت المستغرق:</strong> ${result.timeSpent}</p>
+                    <p><strong>الاختبار:</strong> ${result.examTitle}</p>
+                </div>
+            `;
+            document.getElementById('examResultModal').style.display = 'block';
+        }
+
+        function filterExams() {
+            const category = document.getElementById('examCategory').value;
+            const difficulty = document.getElementById('examDifficulty').value;
+            const examCards = document.querySelectorAll('.exam-card');
+
+            examCards.forEach(card => {
+                const cardCategory = card.getAttribute('data-category');
+                const cardDifficulty = card.getAttribute('data-difficulty');
+
+                const categoryMatch = !category || cardCategory === category;
+                const difficultyMatch = !difficulty || cardDifficulty === difficulty;
+
+                card.style.display = categoryMatch && difficultyMatch ? 'block' : 'none';
+            });
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp) return '';
+            const date = timestamp.toDate();
+            return date.toLocaleDateString('ar-EG');
+        }
+
+        function formatTimeSpent(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes} دقيقة ${remainingSeconds} ثانية`;
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function viewExamDetails(examId) {
+            // يمكن تنفيذ عرض تفاصيل الاختبار
+            uiManager.showMessage('عرض تفاصيل الاختبار - تحت التطوير', 'info');
+        }
+    </script>
+
+    <style>
+        .exams-page {
+            padding: 40px 0;
+        }
+
+        .leaderboard-section {
+            background: var(--white);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 40px;
+        }
+
+        .leaderboard {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: var(--light-gray);
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-item.top-three {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            font-weight: bold;
+        }
+
+        .leaderboard-item:nth-child(2).top-three {
+            background: linear-gradient(135deg, #c0c0c0, #e0e0e0);
+        }
+
+        .leaderboard-item:nth-child(3).top-three {
+            background: linear-gradient(135deg, #cd7f32, #e0a55e);
+        }
+
+        .rank {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-left: 15px;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .exam-name {
+            color: var(--dark-gray);
+            font-size: 0.9rem;
+        }
+
+        .score {
+            font-weight: bold;
+            color: var(--secondary-color);
+            font-size: 1.1rem;
+        }
+
+        .exams-section {
+            background: var(--white);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .exams-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .exams-filters select {
+            min-width: 200px;
+        }
+
+        .exams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .exam-card {
+            background: var(--light-gray);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .exam-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+
+        .exam-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .exam-meta {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+            color: var(--dark-gray);
+            font-size: 0.9rem;
+        }
+
+        .exam-description {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .exam-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .my-results-section {
+            background: var(--white);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-top: 40px;
+        }
+
+        .results-table {
+            margin-top: 20px;
+        }
+
+        .result-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 15px;
+            padding: 15px;
+            border-bottom: 1px solid var(--light-gray);
+            align-items: center;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        /* أنماط واجهة الاختبار */
+        .exam-container {
+            background: var(--white);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .exam-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+        }
+
+        .exam-info h2 {
+            margin-bottom: 10px;
+        }
+
+        .exam-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 1.1rem;
+        }
+
+        .exam-progress {
+            margin-top: 15px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--secondary-color);
+            transition: width 0.3s ease;
+        }
+
+        .question-card {
+            background: var(--light-gray);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+        }
+
+        .question-card h3 {
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: var(--white);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .option-item:hover {
+            border-color: var(--primary-color);
+        }
+
+        .option-item input {
+            margin-left: 10px;
+        }
+
+        .option-text {
+            flex: 1;
+        }
+
+        .exam-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .no-exams {
+            text-align: center;
+            padding: 40px;
+            color: var(--dark-gray);
+            grid-column: 1 / -1;
+        }
+
+        .result-score {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .result-score h3 {
+            font-size: 3rem;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .exams-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .exams-filters {
+                flex-direction: column;
+            }
+
+            .result-item {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .exam-meta {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .exam-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</body>
+</html>

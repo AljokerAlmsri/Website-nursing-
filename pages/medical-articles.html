@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المقالات الطبية - منصة التمريض</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- شريط التنقل -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2><a href="../index.html" style="text-decoration: none; color: inherit;">منصة التمريض</a></h2>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">الرئيسية</a>
+                </li>
+                <li class="nav-item">
+                    <a href="medical-articles.html" class="nav-link active">المقالات الطبية</a>
+                </li>
+                <li class="nav-item" id="authLinks">
+                    <a href="login.html" class="nav-link">تسجيل الدخول</a>
+                </li>
+                <li class="nav-item" id="userMenu" style="display: none;">
+                    <a href="dashboard.html" class="nav-link">لوحة التحكم</a>
+                </li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- المقالات الطبية -->
+    <section class="articles-page">
+        <div class="container">
+            <div class="page-header">
+                <h1>المقالات الطبية</h1>
+                <p>مجموعة من المقالات والمقاييس الطبية المفيدة لطلاب التمريض</p>
+            </div>
+
+            <div class="articles-filters">
+                <input type="text" id="searchArticles" placeholder="ابحث في المقالات..." class="form-control">
+                <select id="categoryFilter" class="form-control">
+                    <option value="">جميع التصنيفات</option>
+                    <option value="تمريض">تمريض</option>
+                    <option value="صحة">صحة</option>
+                    <option value="تشريح">تشريح</option>
+                    <option value="أدوية">أدوية</option>
+                </select>
+            </div>
+
+            <div class="articles-grid" id="articlesGrid">
+                <!-- سيتم ملؤها ديناميكياً -->
+            </div>
+
+            <div class="load-more">
+                <button id="loadMoreBtn" class="btn btn-outline">تحميل المزيد</button>
+            </div>
+        </div>
+    </section>
+
+    <script src="../config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/database.js"></script>
+    <script src="../js/content.js"></script>
+    <script src="../js/ui.js"></script>
+    <script>
+        let allArticles = [];
+        let displayedArticles = [];
+        const articlesPerPage = 9;
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            updateAuthUI();
+            await loadArticles();
+            setupFilters();
+        });
+
+        async function loadArticles() {
+            allArticles = await dbManager.getMedicalArticles();
+            displayedArticles = allArticles.slice(0, articlesPerPage);
+            displayArticles(displayedArticles);
+            
+            // إخفاء زر "تحميل المزيد" إذا لم يكن هناك المزيد
+            document.getElementById('loadMoreBtn').style.display = 
+                allArticles.length > articlesPerPage ? 'block' : 'none';
+        }
+
+        function displayArticles(articles) {
+            const grid = document.getElementById('articlesGrid');
+            
+            if (articles.length === 0) {
+                grid.innerHTML = '<p class="no-results">لا توجد مقالات متاحة</p>';
+                return;
+            }
+
+            grid.innerHTML = articles.map(article => `
+                <div class="article-card" data-category="${article.category || 'عام'}">
+                    <div class="article-image">
+                        ${article.imageUrl ? 
+                            `<img src="${article.imageUrl}" alt="${article.title}">` : 
+                            '📄'
+                        }
+                    </div>
+                    <div class="article-content">
+                        <h3>${article.title}</h3>
+                        <div class="article-meta">
+                            <span class="category">${article.category || 'عام'}</span>
+                            <span>${formatDate(article.createdAt)}</span>
+                        </div>
+                        <p class="article-excerpt">${article.excerpt || article.content.substring(0, 150)}...</p>
+                        <a href="article.html?id=${article.id}" class="read-more">قراءة المزيد</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function setupFilters() {
+            const searchInput = document.getElementById('searchArticles');
+            const categoryFilter = document.getElementById('categoryFilter');
+
+            searchInput.addEventListener('input', filterArticles);
+            categoryFilter.addEventListener('change', filterArticles);
+
+            document.getElementById('loadMoreBtn').addEventListener('click', loadMoreArticles);
+        }
+
+        function filterArticles() {
+            const searchTerm = document.getElementById('searchArticles').value.toLowerCase();
+            const category = document.getElementById('categoryFilter').value;
+
+            let filtered = allArticles;
+
+            if (searchTerm) {
+                filtered = filtered.filter(article => 
+                    article.title.toLowerCase().includes(searchTerm) ||
+                    article.content.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (category) {
+                filtered = filtered.filter(article => 
+                    (article.category || 'عام') === category
+                );
+            }
+
+            displayedArticles = filtered.slice(0, articlesPerPage);
+            displayArticles(displayedArticles);
+
+            document.getElementById('loadMoreBtn').style.display = 
+                filtered.length > articlesPerPage ? 'block' : 'none';
+        }
+
+        function loadMoreArticles() {
+            const searchTerm = document.getElementById('searchArticles').value.toLowerCase();
+            const category = document.getElementById('categoryFilter').value;
+
+            let filtered = allArticles;
+
+            if (searchTerm) {
+                filtered = filtered.filter(article => 
+                    article.title.toLowerCase().includes(searchTerm) ||
+                    article.content.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (category) {
+                filtered = filtered.filter(article => 
+                    (article.category || 'عام') === category
+                );
+            }
+
+            displayedArticles = filtered.slice(0, displayedArticles.length + articlesPerPage);
+            displayArticles(displayedArticles);
+
+            document.getElementById('loadMoreBtn').style.display = 
+                filtered.length > displayedArticles.length ? 'block' : 'none';
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp) return '';
+            const date = timestamp.toDate();
+            return date.toLocaleDateString('ar-EG');
+        }
+    </script>
+
+    <style>
+        .articles-page {
+            padding: 40px 0;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .articles-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .articles-filters input,
+        .articles-filters select {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .article-card .article-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .category {
+            background: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        .load-more {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .no-results {
+            text-align: center;
+            grid-column: 1 / -1;
+            padding: 40px;
+            color: var(--dark-gray);
+        }
+    </style>
+</body>
+</html>

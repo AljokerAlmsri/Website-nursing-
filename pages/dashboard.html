@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - منصة التمريض</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- شريط التنقل -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2><a href="../index.html" style="text-decoration: none; color: inherit;">منصة التمريض</a></h2>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">الرئيسية</a>
+                </li>
+                <li class="nav-item">
+                    <a href="medical-articles.html" class="nav-link">المقالات الطبية</a>
+                </li>
+                <li class="nav-item">
+                    <a href="dashboard.html" class="nav-link active">لوحة التحكم</a>
+                </li>
+                <li class="nav-item">
+                    <a href="profile.html" class="nav-link">الملف الشخصي</a>
+                </li>
+                <li class="nav-item" id="adminMenu" style="display: none;">
+                    <a href="admin.html" class="nav-link">الإدارة</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" id="logoutBtn" class="nav-link">تسجيل الخروج</a>
+                </li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- لوحة التحكم -->
+    <section class="dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>لوحة التحكم</h1>
+                <p id="welcomeMessage">مرحباً بك في منصة التمريض</p>
+            </div>
+
+            <!-- إحصائيات سريعة -->
+            <div class="dashboard-grid">
+                <div class="dashboard-card">
+                    <h3>الكتب المتاحة</h3>
+                    <p id="booksCount">0</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>المحاضرات المرئية</h3>
+                    <p id="videosCount">0</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>المحاضرات الصوتية</h3>
+                    <p id="audiosCount">0</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>الاختبارات</h3>
+                    <p id="examsCount">0</p>
+                </div>
+            </div>
+
+            <!-- المحتوى المتاح -->
+            <div class="dashboard-tabs">
+                <div class="tabs">
+                    <button class="tab-button active" data-tab="books">الكتب</button>
+                    <button class="tab-button" data-tab="videos">الفيديوهات</button>
+                    <button class="tab-button" data-tab="audios">الصوتيات</button>
+                    <button class="tab-button" data-tab="exams">الاختبارات</button>
+                    <button class="tab-button" data-tab="favorites">المفضلة</button>
+                </div>
+
+                <div class="tab-content">
+                    <div id="books-tab" class="tab-pane active">
+                        <h3>الكتب والملفات</h3>
+                        <div id="booksList" class="content-grid">
+                            <!-- سيتم ملؤها ديناميكياً -->
+                        </div>
+                    </div>
+
+                    <div id="videos-tab" class="tab-pane">
+                        <h3>المحاضرات المرئية</h3>
+                        <div id="videosList" class="content-grid">
+                            <!-- سيتم ملؤها ديناميكياً -->
+                        </div>
+                    </div>
+
+                    <div id="audios-tab" class="tab-pane">
+                        <h3>المحاضرات الصوتية</h3>
+                        <div id="audiosList" class="content-grid">
+                            <!-- سيتم ملؤها ديناميكياً -->
+                        </div>
+                    </div>
+
+                    <div id="exams-tab" class="tab-pane">
+                        <h3>الاختبارات</h3>
+                        <div id="examsList" class="content-grid">
+                            <!-- سيتم ملؤها ديناميكياً -->
+                        </div>
+                    </div>
+
+                    <div id="favorites-tab" class="tab-pane">
+                        <h3>المفضلة</h3>
+                        <div id="favoritesList" class="content-grid">
+                            <!-- سيتم ملؤها ديناميكياً -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="../config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/database.js"></script>
+    <script src="../js/content.js"></script>
+    <script src="../js/ui.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // التحقق من تسجيل الدخول
+            if (!authManager.currentUser) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // تحديث واجهة المستخدم
+            updateAuthUI();
+
+            // تحميل بيانات المستخدم
+            const userData = await authManager.getUserData(authManager.currentUser.uid);
+            if (userData) {
+                document.getElementById('welcomeMessage').textContent = `مرحباً ${userData.name}`;
+            }
+
+            // تحميل المحتوى
+            await loadDashboardContent();
+
+            // إعداد الألسنة
+            setupTabs();
+
+            // إعداد زر تسجيل الخروج
+            document.getElementById('logoutBtn').addEventListener('click', async function(e) {
+                e.preventDefault();
+                const result = await authManager.logout();
+                if (result.success) {
+                    window.location.href = '../index.html';
+                }
+            });
+        });
+
+        async function loadDashboardContent() {
+            // تحميل إحصائيات المحتوى
+            const books = await dbManager.getContent({ type: 'book' });
+            const videos = await dbManager.getContent({ type: 'video' });
+            const audios = await dbManager.getContent({ type: 'audio' });
+            const exams = await dbManager.getContent({ type: 'exam' });
+
+            document.getElementById('booksCount').textContent = books.length;
+            document.getElementById('videosCount').textContent = videos.length;
+            document.getElementById('audiosCount').textContent = audios.length;
+            document.getElementById('examsCount').textContent = exams.length;
+
+            // تحميل المحتوى في الألسنة
+            await contentManager.loadContent('book', 'booksList');
+            await contentManager.loadContent('video', 'videosList');
+            await contentManager.loadContent('audio', 'audiosList');
+            await contentManager.loadContent('exam', 'examsList');
+
+            // تحميل المفضلة
+            await loadFavorites();
+        }
+
+        async function loadFavorites() {
+            const favorites = await dbManager.getUserFavorites(authManager.currentUser.uid);
+            const favoritesList = document.getElementById('favoritesList');
+            
+            if (favorites.length === 0) {
+                favoritesList.innerHTML = '<p>لا توجد عناصر في المفضلة</p>';
+                return;
+            }
+
+            favoritesList.innerHTML = '';
+            
+            for (const favorite of favorites) {
+                const contentDoc = await db.collection('content').doc(favorite.contentId).get();
+                if (contentDoc.exists) {
+                    const content = contentDoc.data();
+                    const contentElement = contentManager.createContentElement(
+                        { id: favorite.contentId, ...content }, 
+                        content.type
+                    );
+                    favoritesList.appendChild(contentElement);
+                }
+            }
+        }
+
+        function setupTabs() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // إزالة النشاط من جميع الأزرار والألسنة
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabPanes.forEach(pane => pane.classList.remove('active'));
+                    
+                    // إضافة النشاط للزر واللسان المحدد
+                    this.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+        }
+    </script>
+
+    <style>
+        .dashboard-tabs {
+            margin-top: 40px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--dark-gray);
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .content-card {
+            background: var(--white);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .content-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .content-actions {
+            margin-top: 15px;
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+    </style>
+</body>
+</html>

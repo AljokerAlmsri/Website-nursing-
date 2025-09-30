@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المقال - منصة التمريض</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- شريط التنقل -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2><a href="../index.html" style="text-decoration: none; color: inherit;">منصة التمريض</a></h2>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">الرئيسية</a>
+                </li>
+                <li class="nav-item">
+                    <a href="medical-articles.html" class="nav-link">المقالات الطبية</a>
+                </li>
+                <li class="nav-item" id="authLinks">
+                    <a href="login.html" class="nav-link">تسجيل الدخول</a>
+                </li>
+                <li class="nav-item" id="userMenu" style="display: none;">
+                    <a href="dashboard.html" class="nav-link">لوحة التحكم</a>
+                </li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- صفحة المقال -->
+    <section class="article-single">
+        <div class="container">
+            <div class="article-content" id="articleContent">
+                <!-- سيتم ملؤها ديناميكياً -->
+            </div>
+
+            <div class="article-actions">
+                <button id="shareBtn" class="btn btn-outline">مشاركة المقال</button>
+                <button id="printBtn" class="btn btn-outline">طباعة المقال</button>
+            </div>
+
+            <!-- مقالات ذات صلة -->
+            <div class="related-articles">
+                <h3>مقالات ذات صلة</h3>
+                <div class="articles-grid" id="relatedArticles">
+                    <!-- سيتم ملؤها ديناميكياً -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="../config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/database.js"></script>
+    <script src="../js/content.js"></script>
+    <script src="../js/ui.js"></script>
+    <script>
+        let currentArticle = null;
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            updateAuthUI();
+            
+            // الحصول على معرّف المقال من URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const articleId = urlParams.get('id');
+            
+            if (articleId) {
+                await loadArticle(articleId);
+                await loadRelatedArticles();
+            } else {
+                document.getElementById('articleContent').innerHTML = `
+                    <div class="error-message">
+                        <h2>المقال غير موجود</h2>
+                        <p>عذراً، لم يتم العثور على المقال المطلوب.</p>
+                        <a href="medical-articles.html" class="btn btn-primary">العودة للمقالات</a>
+                    </div>
+                `;
+            }
+
+            // إعداد أزرار المشاركة والطباعة
+            document.getElementById('shareBtn').addEventListener('click', shareArticle);
+            document.getElementById('printBtn').addEventListener('click', printArticle);
+        });
+
+        async function loadArticle(articleId) {
+            try {
+                const articleDoc = await db.collection('medicalArticles').doc(articleId).get();
+                
+                if (articleDoc.exists) {
+                    currentArticle = { id: articleDoc.id, ...articleDoc.data() };
+                    displayArticle(currentArticle);
+                } else {
+                    throw new Error('Article not found');
+                }
+            } catch (error) {
+                console.error('Error loading article:', error);
+                document.getElementById('articleContent').innerHTML = `
+                    <div class="error-message">
+                        <h2>خطأ في تحميل المقال</h2>
+                        <p>حدث خطأ أثناء تحميل المقال. يرجى المحاولة مرة أخرى.</p>
+                        <a href="medical-articles.html" class="btn btn-primary">العودة للمقالات</a>
+                    </div>
+                `;
+            }
+        }
+
+        function displayArticle(article) {
+            const articleContent = document.getElementById('articleContent');
+            
+            articleContent.innerHTML = `
+                <article class="article">
+                    <header class="article-header">
+                        <h1>${article.title}</h1>
+                        <div class="article-meta">
+                            <span class="category">${article.category || 'عام'}</span>
+                            <span>${formatDate(article.createdAt)}</span>
+                        </div>
+                    </header>
+                    
+                    ${article.imageUrl ? `
+                        <div class="article-image">
+                            <img src="${article.imageUrl}" alt="${article.title}">
+                        </div>
+                    ` : ''}
+                    
+                    <div class="article-body">
+                        ${article.content.split('\n').map(paragraph => 
+                            `<p>${paragraph}</p>`
+                        ).join('')}
+                    </div>
+                </article>
+            `;
+
+            // تحديث عنوان الصفحة
+            document.title = `${article.title} - منصة التمريض`;
+        }
+
+        async function loadRelatedArticles() {
+            if (!currentArticle) return;
+
+            const allArticles = await dbManager.getMedicalArticles();
+            const relatedArticles = allArticles
+                .filter(article => 
+                    article.id !== currentArticle.id && 
+                    article.category === currentArticle.category
+                )
+                .slice(0, 3);
+
+            const relatedContainer = document.getElementById('relatedArticles');
+            
+            if (relatedArticles.length === 0) {
+                relatedContainer.innerHTML = '<p>لا توجد مقالات ذات صلة</p>';
+                return;
+            }
+
+            relatedContainer.innerHTML = relatedArticles.map(article => `
+                <div class="article-card">
+                    <div class="article-image">
+                        ${article.imageUrl ? 
+                            `<img src="${article.imageUrl}" alt="${article.title}">` : 
+                            '📄'
+                        }
+                    </div>
+                    <div class="article-content">
+                        <h3>${article.title}</h3>
+                        <div class="article-meta">
+                            <span>${formatDate(article.createdAt)}</span>
+                        </div>
+                        <p class="article-excerpt">${article.excerpt || article.content.substring(0, 100)}...</p>
+                        <a href="article.html?id=${article.id}" class="read-more">قراءة المزيد</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function shareArticle() {
+            if (navigator.share) {
+                navigator.share({
+                    title: currentArticle.title,
+                    text: currentArticle.excerpt || currentArticle.content.substring(0, 100),
+                    url: window.location.href
+                });
+            } else {
+                // نسخ الرابط إلى الحافظة
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    uiManager.showMessage('تم نسخ رابط المقال', 'success');
+                });
+            }
+        }
+
+        function printArticle() {
+            window.print();
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp) return '';
+            const date = timestamp.toDate();
+            return date.toLocaleDateString('ar-EG');
+        }
+    </script>
+
+    <style>
+        .article-single {
+            padding: 40px 0;
+        }
+
+        .article-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--light-gray);
+            padding-bottom: 20px;
+        }
+
+        .article-header h1 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 2.2rem;
+        }
+
+        .article-meta {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            color: var(--dark-gray);
+        }
+
+        .article-image {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .article-image img {
+            max-width: 100%;
+            height: auto;
+            border-radius: var(--border-radius);
+        }
+
+        .article-body {
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        .article-body p {
+            margin-bottom: 20px;
+        }
+
+        .article-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 40px 0;
+            padding: 20px 0;
+            border-top: 1px solid var(--light-gray);
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .related-articles {
+            margin-top: 60px;
+        }
+
+        .related-articles h3 {
+            margin-bottom: 30px;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .error-message h2 {
+            color: var(--accent-color);
+            margin-bottom: 20px;
+        }
+
+        @media print {
+            .navbar, .article-actions, .related-articles {
+                display: none;
+            }
+        }
+    </style>
+</body>
+</html>

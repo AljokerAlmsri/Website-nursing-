@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الملف الشخصي - منصة التمريض</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- شريط التنقل -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2><a href="../index.html" style="text-decoration: none; color: inherit;">منصة التمريض</a></h2>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">الرئيسية</a>
+                </li>
+                <li class="nav-item">
+                    <a href="dashboard.html" class="nav-link">لوحة التحكم</a>
+                </li>
+                <li class="nav-item">
+                    <a href="profile.html" class="nav-link active">الملف الشخصي</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" id="logoutBtn" class="nav-link">تسجيل الخروج</a>
+                </li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- الملف الشخصي -->
+    <section class="profile">
+        <div class="container">
+            <div class="profile-header">
+                <h1>الملف الشخصي</h1>
+            </div>
+
+            <div class="profile-content">
+                <div class="profile-sidebar">
+                    <div class="profile-image">
+                        <img id="profileImage" src="" alt="صورة الملف الشخصي">
+                        <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                        <button class="btn btn-outline btn-sm" onclick="document.getElementById('imageUpload').click()">تغيير الصورة</button>
+                    </div>
+                    
+                    <div class="profile-stats">
+                        <h3>إحصائياتي</h3>
+                        <div class="stat-item">
+                            <span>الاختبارات المكتملة:</span>
+                            <span id="completedExams">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>المفضلة:</span>
+                            <span id="favoritesCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>المحتوى المضاف:</span>
+                            <span id="addedContent">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-main">
+                    <form id="profileForm">
+                        <div class="form-group">
+                            <label for="name" class="form-label">الاسم الكامل</label>
+                            <input type="text" id="name" class="form-control" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email" class="form-label">البريد الإلكتروني</label>
+                            <input type="email" id="email" class="form-control" required disabled>
+                            <small class="form-text">لا يمكن تغيير البريد الإلكتروني</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="governorate" class="form-label">المحافظة</label>
+                            <select id="governorate" class="form-control" required>
+                                <option value="">اختر المحافظة</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="university" class="form-label">الجامعة</label>
+                            <select id="university" class="form-control" required>
+                                <option value="">اختر الجامعة</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="college" class="form-label">الكلية</label>
+                            <select id="college" class="form-control" required>
+                                <option value="">اختر الكلية</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="year" class="form-label">الفرقة</label>
+                            <select id="year" class="form-control" required>
+                                <option value="">اختر الفرقة</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="currentPassword" class="form-label">كلمة المرور الحالية (للتغيير فقط)</label>
+                            <input type="password" id="currentPassword" class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="newPassword" class="form-label">كلمة المرور الجديدة</label>
+                            <input type="password" id="newPassword" class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confirmNewPassword" class="form-label">تأكيد كلمة المرور الجديدة</label>
+                            <input type="password" id="confirmNewPassword" class="form-control">
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
+                            <button type="button" class="btn btn-outline" onclick="resetForm()">إلغاء</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="../config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/database.js"></script>
+    <script src="../js/ui.js"></script>
+    <script>
+        let originalUserData = null;
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            if (!authManager.currentUser) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            updateAuthUI();
+            await loadUserProfile();
+            setupEventListeners();
+
+            document.getElementById('logoutBtn').addEventListener('click', async function(e) {
+                e.preventDefault();
+                const result = await authManager.logout();
+                if (result.success) {
+                    window.location.href = '../index.html';
+                }
+            });
+        });
+
+        async function loadUserProfile() {
+            const userData = await authManager.getUserData(authManager.currentUser.uid);
+            if (userData) {
+                originalUserData = userData;
+                populateForm(userData);
+                await loadUserStats();
+            }
+        }
+
+        function populateForm(userData) {
+            document.getElementById('name').value = userData.name || '';
+            document.getElementById('email').value = userData.email || '';
+            
+            // تحميل القوائم المنسدلة
+            const governorateSelect = document.getElementById('governorate');
+            const universitySelect = document.getElementById('university');
+            const collegeSelect = document.getElementById('college');
+            const yearSelect = document.getElementById('year');
+
+            uiManager.loadGovernorates(governorateSelect);
+            uiManager.loadYears(yearSelect);
+
+            // تعيين القيم الحالية
+            if (userData.governorate) {
+                governorateSelect.value = userData.governorate;
+                uiManager.loadUniversities(universitySelect, userData.governorate);
+                
+                setTimeout(() => {
+                    if (userData.university) {
+                        universitySelect.value = userData.university;
+                        uiManager.loadColleges(collegeSelect, userData.university);
+                        
+                        setTimeout(() => {
+                            if (userData.college) collegeSelect.value = userData.college;
+                            if (userData.year) yearSelect.value = userData.year;
+                        }, 100);
+                    }
+                }, 100);
+            }
+
+            // صورة الملف الشخصي
+            const profileImage = document.getElementById('profileImage');
+            if (userData.profileImage) {
+                profileImage.src = userData.profileImage;
+            } else {
+                profileImage.src = '../assets/images/default-avatar.png';
+            }
+        }
+
+        async function loadUserStats() {
+            // الاختبارات المكتملة
+            const examResults = await dbManager.getUserExamResults(authManager.currentUser.uid);
+            document.getElementById('completedExams').textContent = examResults.length;
+
+            // المفضلة
+            const favorites = await dbManager.getUserFavorites(authManager.currentUser.uid);
+            document.getElementById('favoritesCount').textContent = favorites.length;
+
+            // المحتوى المضاف
+            const userContent = await db.collection('content')
+                .where('createdBy', '==', authManager.currentUser.uid)
+                .get();
+            document.getElementById('addedContent').textContent = userContent.size;
+        }
+
+        function setupEventListeners() {
+            // تغيير المحافظة
+            document.getElementById('governorate').addEventListener('change', function() {
+                const universitySelect = document.getElementById('university');
+                uiManager.loadUniversities(universitySelect, this.value);
+            });
+
+            // تغيير الجامعة
+            document.getElementById('university').addEventListener('change', function() {
+                const collegeSelect = document.getElementById('college');
+                uiManager.loadColleges(collegeSelect, this.value);
+            });
+
+            // تغيير صورة الملف الشخصي
+            document.getElementById('imageUpload').addEventListener('change', async function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    try {
+                        const imageUrl = await uiManager.uploadProfileImage(file);
+                        await authManager.updateUserProfile(authManager.currentUser.uid, {
+                            profileImage: imageUrl
+                        });
+                        document.getElementById('profileImage').src = imageUrl;
+                        uiManager.showMessage('تم تحديث صورة الملف الشخصي', 'success');
+                    } catch (error) {
+                        uiManager.showMessage('خطأ في تحديث الصورة', 'error');
+                    }
+                }
+            });
+
+            // تقديم النموذج
+            document.getElementById('profileForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await updateProfile();
+            });
+        }
+
+        async function updateProfile() {
+            const name = document.getElementById('name').value;
+            const governorate = document.getElementById('governorate').value;
+            const university = document.getElementById('university').value;
+            const college = document.getElementById('college').value;
+            const year = document.getElementById('year').value;
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+            const updates = {
+                name,
+                governorate,
+                university,
+                college,
+                year
+            };
+
+            try {
+                // تحديث البيانات الأساسية
+                await authManager.updateUserProfile(authManager.currentUser.uid, updates);
+
+                // تحديث كلمة المرور إذا تم إدخالها
+                if (currentPassword && newPassword) {
+                    if (newPassword !== confirmNewPassword) {
+                        uiManager.showMessage('كلمات المرور الجديدة غير متطابقة', 'error');
+                        return;
+                    }
+
+                    // إعادة المصادقة لتغيير كلمة المرور
+                    const user = auth.currentUser;
+                    const credential = firebase.auth.EmailAuthProvider.credential(
+                        user.email, 
+                        currentPassword
+                    );
+
+                    await user.reauthenticateWithCredential(credential);
+                    await user.updatePassword(newPassword);
+                }
+
+                uiManager.showMessage('تم تحديث الملف الشخصي بنجاح', 'success');
+                resetPasswordFields();
+                
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                uiManager.showMessage('حدث خطأ أثناء تحديث الملف الشخصي', 'error');
+            }
+        }
+
+        function resetForm() {
+            if (originalUserData) {
+                populateForm(originalUserData);
+                resetPasswordFields();
+            }
+        }
+
+        function resetPasswordFields() {
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+        }
+    </script>
+
+    <style>
+        .profile {
+            padding: 40px 0;
+        }
+
+        .profile-header {
+            margin-bottom: 40px;
+        }
+
+        .profile-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 40px;
+        }
+
+        .profile-sidebar {
+            background: var(--white);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            height: fit-content;
+        }
+
+        .profile-image {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-image img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 3px solid var(--primary-color);
+        }
+
+        .profile-stats {
+            border-top: 1px solid var(--light-gray);
+            padding-top: 20px;
+        }
+
+        .profile-stats h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .profile-main {
+            background: var(--white);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .form-text {
+            color: var(--dark-gray);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .profile-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .profile-sidebar {
+                order: 2;
+            }
+
+            .profile-main {
+                order: 1;
+            }
+        }
+    </style>
+</body>
+</html>

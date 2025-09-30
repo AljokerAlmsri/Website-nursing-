@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل حساب جديد - منصة التمريض</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- شريط التنقل -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2><a href="../index.html" style="text-decoration: none; color: inherit;">منصة التمريض</a></h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="../index.html" class="nav-link">الرئيسية</a>
+                </li>
+                <li class="nav-item">
+                    <a href="login.html" class="nav-link">تسجيل الدخول</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- قسم التسجيل -->
+    <section class="auth-section">
+        <div class="container">
+            <div class="auth-container">
+                <h2 class="auth-title">إنشاء حساب جديد</h2>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="name" class="form-label">الاسم الكامل</label>
+                        <input type="text" id="name" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="form-label">البريد الإلكتروني</label>
+                        <input type="email" id="email" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">كلمة المرور</label>
+                        <input type="password" id="password" class="form-control" required minlength="6">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword" class="form-label">تأكيد كلمة المرور</label>
+                        <input type="password" id="confirmPassword" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="governorate" class="form-label">المحافظة</label>
+                        <select id="governorate" class="form-control" required>
+                            <option value="">اختر المحافظة</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="university" class="form-label">الجامعة</label>
+                        <select id="university" class="form-control" required>
+                            <option value="">اختر الجامعة</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="college" class="form-label">الكلية</label>
+                        <select id="college" class="form-control" required>
+                            <option value="">اختر الكلية</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="year" class="form-label">الفرقة</label>
+                        <select id="year" class="form-control" required>
+                            <option value="">اختر الفرقة</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="profileImage" class="form-label">صورة الملف الشخصي (اختياري)</label>
+                        <input type="file" id="profileImage" class="form-control" accept="image/*">
+                        <div id="imagePreview" class="image-preview"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-block">إنشاء الحساب</button>
+                    </div>
+
+                    <div class="auth-links">
+                        <p>لديك حساب بالفعل؟ <a href="login.html">سجل الدخول هنا</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <script src="../config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/ui.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // تحميل البيانات في القوائم المنسدلة
+            const governorateSelect = document.getElementById('governorate');
+            const universitySelect = document.getElementById('university');
+            const collegeSelect = document.getElementById('college');
+            const yearSelect = document.getElementById('year');
+
+            uiManager.loadGovernorates(governorateSelect);
+            uiManager.loadYears(yearSelect);
+
+            // عند تغيير المحافظة
+            governorateSelect.addEventListener('change', function() {
+                uiManager.loadUniversities(universitySelect, this.value);
+            });
+
+            // عند تغيير الجامعة
+            universitySelect.addEventListener('change', function() {
+                uiManager.loadColleges(collegeSelect, this.value);
+            });
+
+            // معاينة الصورة
+            const profileImageInput = document.getElementById('profileImage');
+            const imagePreview = document.getElementById('imagePreview');
+
+            profileImageInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.innerHTML = `<img src="${e.target.result}" alt="معاينة الصورة" style="max-width: 150px; margin-top: 10px; border-radius: 8px;">`;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // تقديم النموذج
+            document.getElementById('registerForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const governorate = document.getElementById('governorate').value;
+                const university = document.getElementById('university').value;
+                const college = document.getElementById('college').value;
+                const year = document.getElementById('year').value;
+                const profileImage = document.getElementById('profileImage').files[0];
+
+                // التحقق من كلمات المرور
+                if (password !== confirmPassword) {
+                    uiManager.showMessage('كلمات المرور غير متطابقة', 'error');
+                    return;
+                }
+
+                let profileImageUrl = '';
+                
+                // رفع صورة الملف الشخصي إذا تم اختيارها
+                if (profileImage) {
+                    try {
+                        profileImageUrl = await uiManager.uploadProfileImage(profileImage);
+                    } catch (error) {
+                        uiManager.showMessage('خطأ في رفع الصورة', 'error');
+                        return;
+                    }
+                }
+
+                const userData = {
+                    name,
+                    email,
+                    password,
+                    governorate,
+                    university,
+                    college,
+                    year,
+                    profileImage: profileImageUrl
+                };
+
+                const result = await authManager.register(userData);
+
+                if (result.success) {
+                    uiManager.showMessage('تم إنشاء الحساب بنجاح!', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 2000);
+                } else {
+                    uiManager.showMessage(result.error, 'error');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
