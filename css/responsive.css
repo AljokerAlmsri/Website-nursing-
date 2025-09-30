@@ -1,0 +1,291 @@
+/* التصميم المتجاوب للشاشات المختلفة */
+
+/* شاشات كبيرة (أكبر من 1200px) */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1140px;
+    }
+}
+
+/* شاشات متوسطة (أقل من 992px) */
+@media (max-width: 991px) {
+    .hero-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .hero-buttons {
+        margin-bottom: 30px;
+    }
+
+    .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .articles-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .footer-content {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* شاشات صغيرة (أقل من 768px) */
+@media (max-width: 767px) {
+    .nav-menu {
+        position: fixed;
+        right: -100%;
+        top: 70px;
+        flex-direction: column;
+        background-color: var(--white);
+        width: 100%;
+        text-align: center;
+        transition: 0.3s;
+        box-shadow: 0 10px 27px rgba(0, 0, 0, 0.05);
+        padding: 20px 0;
+    }
+
+    .nav-menu.active {
+        right: 0;
+    }
+
+    .nav-item {
+        margin: 15px 0;
+    }
+
+    .hamburger {
+        display: flex;
+    }
+
+    .hero {
+        padding: 60px 0;
+    }
+
+    .hero-content h1 {
+        font-size: 2rem;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .articles-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-content {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .admin-tabs .tabs {
+        flex-direction: column;
+    }
+
+    .articles-filters {
+        flex-direction: column;
+    }
+
+    .article-actions {
+        flex-direction: column;
+    }
+
+    .content-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .content-actions {
+        align-self: stretch;
+        justify-content: space-between;
+    }
+
+    .tab-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+
+    .modal-content {
+        margin: 10% auto;
+        width: 95%;
+        padding: 15px;
+    }
+}
+
+/* شاشات صغيرة جداً (أقل من 576px) */
+@media (max-width: 575px) {
+    .container {
+        padding: 0 15px;
+    }
+
+    .hero-content h1 {
+        font-size: 1.8rem;
+    }
+
+    .hero-content p {
+        font-size: 1rem;
+    }
+
+    .hero-buttons .btn {
+        display: block;
+        margin: 10px 0;
+        width: 100%;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+    }
+
+    .auth-container {
+        margin: 20px auto;
+        padding: 20px;
+    }
+
+    .admin-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card p {
+        font-size: 1.5rem;
+    }
+
+    .content-actions {
+        flex-wrap: wrap;
+    }
+
+    .btn-sm {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+}
+
+/* تحسينات للطباعة */
+@media print {
+    .navbar,
+    .footer,
+    .article-actions,
+    .related-articles,
+    .admin-tabs .tabs {
+        display: none !important;
+    }
+
+    .article-single {
+        padding: 0;
+    }
+
+    .container {
+        max-width: 100%;
+        padding: 0;
+    }
+
+    body {
+        background: white;
+        color: black;
+        font-size: 12pt;
+        line-height: 1.4;
+    }
+
+    .article-body {
+        font-size: 12pt;
+    }
+
+    a {
+        color: black;
+        text-decoration: underline;
+    }
+
+    .article-image img {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+}
+
+/* تحسينات للأجهزة التي تدعم اللمس */
+@media (hover: none) and (pointer: coarse) {
+    .btn,
+    .nav-link,
+    .tab-button {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .form-control {
+        font-size: 16px; /* منع التكبير في iOS */
+    }
+}
+
+/* تحسينات للوضع الداكن */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --text-color: #e0e0e0;
+        --light-gray: #1a1a1a;
+        --white: #2d2d2d;
+        --dark-gray: #b0b0b0;
+    }
+
+    body {
+        background-color: #121212;
+        color: var(--text-color);
+    }
+
+    .navbar,
+    .feature-card,
+    .article-card,
+    .content-card,
+    .dashboard-card,
+    .stat-card,
+    .content-item,
+    .auth-container,
+    .modal-content {
+        background-color: var(--white);
+        color: var(--text-color);
+    }
+
+    .form-control {
+        background-color: #1a1a1a;
+        border-color: #333;
+        color: var(--text-color);
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+    }
+}
+
+/* تحسينات للشاشات عالية الدقة */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .feature-icon,
+    .content-icon {
+        font-size: 3.5rem;
+    }
+}
+
+/* تحسينات للتوجه الأفقي للهواتف */
+@media (max-height: 500px) and (orientation: landscape) {
+    .hero {
+        padding: 40px 0;
+    }
+
+    .auth-container {
+        margin: 10px auto;
+        padding: 15px;
+    }
+
+    .navbar {
+        position: static;
+    }
+}
