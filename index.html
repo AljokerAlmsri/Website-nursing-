@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة كلية التمريض</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+</head>
+<body>
+    <!-- شريط التنقل -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>منصة التمريض</h2>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link">الرئيسية</a>
+                </li>
+                <li class="nav-item">
+                    <a href="pages/medical-articles.html" class="nav-link">المقالات الطبية</a>
+                </li>
+                <li class="nav-item" id="authLinks">
+                    <a href="pages/login.html" class="nav-link">تسجيل الدخول</a>
+                </li>
+                <li class="nav-item" id="userMenu" style="display: none;">
+                    <a href="pages/dashboard.html" class="nav-link">لوحة التحكم</a>
+                </li>
+                <li class="nav-item" id="adminMenu" style="display: none;">
+                    <a href="pages/admin.html" class="nav-link">الإدارة</a>
+                </li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- قسم الهيرو -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>منصة تعليمية متكاملة لطلاب التمريض</h1>
+            <p>الكتب، المحاضرات، الاختبارات، والمقالات الطبية كل ما تحتاجه في مكان واحد</p>
+            <div class="hero-buttons">
+                <a href="pages/register.html" class="btn btn-primary">انضم إلينا</a>
+                <a href="pages/medical-articles.html" class="btn btn-secondary">استكشف المقالات</a>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="assets/images/nursing-hero.png" alt="طلاب التمريض">
+        </div>
+    </section>
+
+    <!-- قسم المميزات -->
+    <section class="features">
+        <div class="container">
+            <h2 class="section-title">مميزات المنصة</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📚</div>
+                    <h3>الكتب والملفات</h3>
+                    <p>مجموعة شاملة من الكتب والملفات التعليمية بصيغة PDF</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎬</div>
+                    <h3>المحاضرات المرئية</h3>
+                    <p>فيديوهات تعليمية لمختلف تخصصات التمريض</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎧</div>
+                    <h3>المحاضرات الصوتية</h3>
+                    <p>استمع للمحاضرات في أي وقت ومن أي مكان</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <h3>الاختبارات</h3>
+                    <p>اختبر معلوماتك وتابع تقدمك التعليمي</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">❤️</div>
+                    <h3>المفضلة</h3>
+                    <p>احفظ المحتوى المهم لك في قائمة المفضلة</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏆</div>
+                    <h3>التصنيفات</h3>
+                    <p>تنافس مع زملائك وتصدر قائمة المتفوقين</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- قسم المقالات الأخيرة -->
+    <section class="latest-articles">
+        <div class="container">
+            <h2 class="section-title">أحدث المقالات الطبية</h2>
+            <div class="articles-grid" id="latestArticles">
+                <!-- سيتم ملؤها ديناميكياً -->
+            </div>
+            <div class="text-center">
+                <a href="pages/medical-articles.html" class="btn btn-outline">عرض جميع المقالات</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- الفوتر -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>منصة التمريض</h3>
+                    <p>منصة تعليمية متكاملة تهدف إلى دعم طلاب كلية التمريض في رحلتهم التعليمية.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>روابط سريعة</h3>
+                    <ul>
+                        <li><a href="index.html">الرئيسية</a></li>
+                        <li><a href="pages/medical-articles.html">المقالات الطبية</a></li>
+                        <li><a href="pages/login.html">تسجيل الدخول</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>اتصل بنا</h3>
+                    <p>البريد الإلكتروني: info@nursing-platform.com</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>جميع الحقوق محفوظة &copy; 2023 منصة كلية التمريض</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+        // تحميل المقالات الأخيرة
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLatestArticles();
+            updateAuthUI();
+        });
+    </script>
+</body>
+</html>
