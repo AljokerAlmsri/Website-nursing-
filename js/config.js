@@ -1,16 +1,17 @@
 // سيتم استبدال هذه القيم بقيمك الخاصة
 const firebaseConfig = {
-    apiKey: "your-api-key",
-    authDomain: "your-project.firebaseapp.com",
-    projectId: "your-project-id",
-    storageBucket: "your-project.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "your-app-id"
+  apiKey: "AIzaSyCTfKgp7LlgWM5Ps0r-ZBDdZlJdbP5wStE",
+  authDomain: "dr-syringe-2fe1f.firebaseapp.com",
+  databaseURL: "https://dr-syringe-2fe1f-default-rtdb.firebaseio.com",
+  projectId: "dr-syringe-2fe1f",
+  storageBucket: "dr-syringe-2fe1f.firebasestorage.app",
+  messagingSenderId: "966755258991",
+  appId: "1:966755258991:web:48a240d366d008f4db339a",
+  measurementId: "G-LM138THGJT"
 };
-
 const githubConfig = {
-    token: "your-github-token",
-    repo: "username/repo-name",
+    token: "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",
+    repo: "AljokerAlmsri/Website-nursing-",
     branch: "main"
 };
 
